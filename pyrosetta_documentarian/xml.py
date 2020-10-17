@@ -1,6 +1,7 @@
 import pyrosetta, os
 from collections import defaultdict
 from typing import List, Optional
+from warnings import warn
 
 from .base import BaseDocumentarian
 
@@ -71,7 +72,11 @@ class XMLDocumentarian(BaseDocumentarian):
     def xmlprotocols(self):
         if self._xmlprotocols != {}:
             return self._xmlprotocols
-        self._xmlprotocols = {xmlfilename: self.load_xmlfilename(xmlfilename) for xmlfilename in self._xmlfilenames}
+        for xmlfilename in self.xmlfilenames:
+            try:
+                self._xmlprotocols[xmlfilename] = self.load_xmlfilename(xmlfilename)
+            except Exception as error:
+                warn(f'{xmlfilename} could not be read due to {error.__class__.__name__}: {error}')
         return self._xmlprotocols
 
     def load_xmlfilename(self, xmlfilename: str):
