@@ -1,4 +1,5 @@
 import pyrosetta
+from warnings import warn
 from typing import Tuple
 
 
@@ -17,6 +18,10 @@ class BaseDocumentarian:
         else:  # it's an instance-ish
             self.target = target
             self.target_cls = target.__class__
+
+    @classmethod
+    def generic(cls):
+        return cls(pyrosetta.rosetta.protocols.moves.Mover())
 
     @property
     def base(self) -> Tuple[object]:

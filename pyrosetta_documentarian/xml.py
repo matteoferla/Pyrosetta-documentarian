@@ -1,15 +1,17 @@
 import pyrosetta, os
 from collections import defaultdict
-from typing import List, Optional
+from typing import List, Optional, Union
 from warnings import warn
+from bs4 import BeautifulSoup  # beautifulsoup4 lxml
 
 from .base import BaseDocumentarian
 
 class XMLDocumentarian(BaseDocumentarian):
     test_folder = 'main/tests/integration/tests'
-    _xmlfilenames = []
-    _xmlprotocols = {}
-    _mover_directory = defaultdict(list)
+    # cached properties:
+    _xmlfilenames = [] #: all the xml files in the test folder
+    _xmlprotocols = {} #: all the protocols of the the filesnames (fails!)
+    _mover_directory = defaultdict(list) #: all the filenmaes that have a given mover.
 
     def get_relevant_scripts(self) -> List[str]:
         """
@@ -23,13 +25,26 @@ class XMLDocumentarian(BaseDocumentarian):
         else:
             return []
 
-    def get_mover_from_script(self, xmlfilename: str, target: Optional=None):
+    def get_mover_from_script(self,
+                              xmlfilename: str,
+                              target: Optional[Union[pyrosetta.rosetta.protocols.moves.Mover, str]]=None
+                              ) -> pyrosetta.rosetta.protocols.moves.Mover:
+        """
+        Get the mover from the script ``xmlfilename`` of the same type as ``target`` (mover or mover name)
+        If omitted ``xml_documentarian.target`` is used.
+
+        :param xmlfilename:
+        :param target:
+        :return:
+        """
         if target is None:
             target = self.target
         protocol = self.load_xmlfilename(xmlfilename)
         movers = self.get_movers_in_protocol(protocol)
         for mover in movers:
-            if mover.get_name() == target.get_name():
+            if isinstance(target, str) and mover.get_name() == target:
+                return mover
+            elif mover.get_name() == target.get_name():
                 return mover
         else:
             raise ValueError(f'Could not find mover {target.get_name()} in {xmlfilename}')
@@ -38,16 +53,20 @@ class XMLDocumentarian(BaseDocumentarian):
     def mover_directory(self):
         """
         This is a dictionary associates a mover name with a list of files that use it.
-        This can be used with xmlprotocols associates a file with a protocol obj
-        and then self.get_movers_in_protocol(proto).
-        The latter can be compared with the attribute comparison methods.
+        This can be used with
         """
         if self._mover_directory:
             return self._mover_directory
-        for filename, proto in self.xmlprotocols.items():
-            for mover in self.get_movers_in_protocol(proto):
-                self._mover_directory[mover.get_name()].append(filename)
+        for filename in self.xmlfilenames:
+            for movername in self.get_movernames_from_xmlfilename(filename):
+                self._mover_directory[movername].append(filename)
         return self._mover_directory
+
+    def get_movernames_from_xmlfilename(self, xmlfilename: str) -> List[str]:
+        soup = BeautifulSoup(open(xmlfilename), 'xml')
+        if soup.ROSETTASCRIPTS.MOVERS is None:
+            return []
+        return [tag.name for tag in soup.ROSETTASCRIPTS.MOVERS.findChildren()]
 
     @property  # cached
     def xmlfilenames(self):
@@ -70,6 +89,7 @@ class XMLDocumentarian(BaseDocumentarian):
 
     @property  # cached
     def xmlprotocols(self):
+        warn('This will not work!')
         if self._xmlprotocols != {}:
             return self._xmlprotocols
         for xmlfilename in self.xmlfilenames:
