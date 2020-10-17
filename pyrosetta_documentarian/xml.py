@@ -69,7 +69,7 @@ class XMLDocumentarian(BaseDocumentarian):
             return soup.JobDefinitionFile.Common
         else:
             warn(f'This is not standard: {soup}')
-            BeautifulSoup('<main><MOVERS></MOVERS><FILTERS></FILTERS></main>', 'xml')
+            return BeautifulSoup('<main><MOVERS></MOVERS><FILTERS></FILTERS></main>', 'xml')
 
     def get_movernames_from_xmlfilename(self, xmlfilename: str) -> List[str]:
         soup = BeautifulSoup(open(xmlfilename), 'xml')
