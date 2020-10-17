@@ -65,8 +65,11 @@ class XMLDocumentarian(BaseDocumentarian):
     def _get_root_of_xml(self, soup: BeautifulSoup): # -> bs4.element.Tag:
         if soup.ROSETTASCRIPTS is not None:
             return soup.ROSETTASCRIPTS
-        else:
+        elif soup.JobDefinitionFile is not None:
             return soup.JobDefinitionFile.Common
+        else:
+            warn(f'This is not standard: {soup}')
+            BeautifulSoup('<MOVERS></MOVERS><FILTERS></FILTERS>', 'html.parser').b
 
     def get_movernames_from_xmlfilename(self, xmlfilename: str) -> List[str]:
         soup = BeautifulSoup(open(xmlfilename), 'xml')
