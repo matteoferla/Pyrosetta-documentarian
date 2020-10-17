@@ -62,11 +62,25 @@ class XMLDocumentarian(BaseDocumentarian):
                 self._mover_directory[movername].append(filename)
         return self._mover_directory
 
+    def _get_root_of_xml(self, soup: BeautifulSoup): # -> bs4.element.Tag:
+        if soup.ROSETTASCRIPTS is not None:
+            return soup.ROSETTASCRIPTS
+        else:
+            return soup.JobDefinitionFile.Common
+
     def get_movernames_from_xmlfilename(self, xmlfilename: str) -> List[str]:
         soup = BeautifulSoup(open(xmlfilename), 'xml')
-        if soup.ROSETTASCRIPTS.MOVERS is None:
+        scripts = self._get_root_of_xml(soup)
+        if scripts.MOVERS is None:
             return []
-        return [tag.name for tag in soup.ROSETTASCRIPTS.MOVERS.findChildren()]
+        return [tag.name for tag in scripts.MOVERS.findChildren()]
+
+    def get_filternames_from_xmlfilename(self, xmlfilename: str) -> List[str]:
+        soup = BeautifulSoup(open(xmlfilename), 'xml')
+        scripts = self._get_root_of_xml(soup)
+        if scripts.FILTERS is None:
+            return []
+        return [tag.name for tag in scripts.FILTERS.findChildren()]
 
     @property  # cached
     def xmlfilenames(self):
