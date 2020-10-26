@@ -57,4 +57,21 @@ Here is the functionality from the CommentDocumentarian base class
 
     doco.hide_emails = True
     print(doco.comments)
+    
+## Fill mover_directory quickly
+
+The file `mover2files.json` is a preparsed mover_directory (mover name to test files using it).
+
+    Documentarian.rosetta_folder = '👾👾👾'
+    
+    import json
+    raw_data = json.load(open('mover2files.json'))
+    fix_path = lambda path: path.replace('${ROSETTA_PATH}', f'{Documentarian.rosetta_folder}/main')
+    Documentarian._mover_directory = {k: [fix_path(vv) for vv in set(v)] for k, v in raw_data.items()}
+    
+    
+
+
+
+
 
