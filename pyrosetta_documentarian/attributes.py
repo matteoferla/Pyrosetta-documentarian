@@ -115,8 +115,10 @@ class AttributeDocumentarian(BaseDocumentarian):
         return self._make_table(c, r)
 
     def _make_table(self, case: Dict[str, Any], ref: Dict[str, Any]) -> pd.DataFrame:
+        assert case, f'make_table cannot make a table without data (case={case}, ref={ref})'
         proto = [{'attribute': k,
                   'target': ref[k],
                   'reference':  case[k],
                   'different': str(ref[k]) == str(case[k])} for k in case.keys()]
-        return pd.DataFrame(proto, index='attribute')
+        comparison = pd.DataFrame(proto)
+        return comparison.set_index(['attribute'])
