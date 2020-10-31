@@ -119,6 +119,6 @@ class AttributeDocumentarian(BaseDocumentarian):
         proto = [{'attribute': k,
                   'target': ref[k],
                   'reference':  case[k],
-                  'different': str(ref[k]) == str(case[k])} for k in case.keys()]
+                  'equal': str(ref[k]) == str(case[k])} for k in case.keys()]
         comparison = pd.DataFrame(proto)
         return comparison.set_index(['attribute'])

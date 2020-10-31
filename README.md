@@ -47,6 +47,12 @@ Alternatively,
     doco.compare()
 
 Would compare `doco.target` to a blank instance of its parent class (`doco.target_cls`).
+
+So if you want to see only the attributes that differ in a Jupyter notebook, you'd do
+
+    from IPython.display import display
+    comparision = doco.compare()
+    display(comparision.loc[~comparision.equal])
     
 ### See what are the C++ comments
 The documentation of pyrosetta is derived from `@brief` tags in comments preceeding methods and classes.
