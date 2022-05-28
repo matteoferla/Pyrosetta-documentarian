@@ -1,5 +1,5 @@
 # Pyrosetta-documentarian
-A class to help reverse engineer what what a Pyrosetta class does...
+A class to help reverse engineer what a Pyrosetta class does.
 
 ## Note
 
@@ -10,8 +10,10 @@ I plan to run it through all the classes and compile a set of tables of results.
 
 Import it
 
-    from pyrosetta_documentarian import Documentarian
-    Documentarian.rosetta_folder = 'User/matteo/rosetta'
+```python
+from pyrosetta_documentarian import Documentarian
+Documentarian.rosetta_folder = 'User/matteo/rosetta'
+```
     
 That is, to use the XML and the Comment functionalities it needs a regular Rosetta path to work.
 
@@ -39,7 +41,9 @@ Here is the functionality from the `XMLDocumentarian` base class:
     
 Here is the unctionality from the AttributeDocumentarian base class
     
-    doco.compare(reference)
+```python
+doco.compare(reference)
+```
 
 The latter returns a pandas table showing what the differences are between `doco.target` and `reference`.
 Alternatively,
@@ -50,10 +54,20 @@ Would compare `doco.target` to a blank instance of its parent class (`doco.targe
 
 So if you want to see only the attributes that differ in a Jupyter notebook, you'd do
 
-    from IPython.display import display
-    comparision = doco.compare()
-    display(comparision.loc[~comparision.equal])
-    
+```python
+from IPython.display import display
+comparison = doco.compare()
+display(comparison.loc[~comparison.equal])
+```
+
+## Use precached data
+
+The file `mover2files.json` is a preparsed mover_directory (mover name to test files using it).
+This gets loaded with `Documentarian.fill()`.
+
+    Documentarian.rosetta_folder = '👾👾👾'
+    Documentarian.fill()
+
 ### See what are the C++ comments
 The documentation of pyrosetta is derived from `@brief` tags in comments preceeding methods and classes.
 This assumes there is nothing odd.
@@ -63,17 +77,6 @@ Here is the functionality from the CommentDocumentarian base class
 
     doco.hide_emails = True
     print(doco.comments)
-    
-## Fill mover_directory quickly
-
-The file `mover2files.json` is a preparsed mover_directory (mover name to test files using it).
-
-    Documentarian.rosetta_folder = '👾👾👾'
-    
-    import json
-    raw_data = json.load(open('mover2files.json'))
-    fix_path = lambda path: path.replace('${ROSETTA_PATH}', f'{Documentarian.rosetta_folder}/main')
-    Documentarian._mover_directory = {k: [fix_path(vv) for vv in set(v)] for k, v in raw_data.items()}
     
     
 
