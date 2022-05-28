@@ -1,0 +1,4 @@
+include README.md
+include LICENSE
+include requirements.txt
+include pyrosetta_documentarian/mover2files.json

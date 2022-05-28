@@ -1,6 +1,6 @@
 import os, re, pyrosetta
 from collections import defaultdict
-from typing import Optional
+from typing import Optional, List
 
 from .base import BaseDocumentarian
 
@@ -62,9 +62,9 @@ class CommentDocumentarian(BaseDocumentarian):
         if self.hide_emails:
             for attribute, comment in self._comments.items():
                 if re.search('[\w\._]+\@[\w\._]+\.\w+', comment):
-                    self._comments[attribute] = re.sub('[\w\._]+\@[\w\._]+\.\w+', '👾👾.👾👾👾@👾👾👾.👾👾', comment)
-        # done
-        return self
+                    self._comments[attribute] = re.sub('[\w\._]+\@[\w\._]+\.\w+',
+                                                       '👾👾.👾👾👾@👾👾👾.👾👾',
+                                                       comment)
 
     def _parse_line(self, line: str) -> None:
         if line == '':
@@ -179,9 +179,10 @@ class CommentDocumentarian(BaseDocumentarian):
             extensions = ('.h', '.hh')
         else:
             extensions = ('.cpp', '.cc', '.c')
-        for extension in extensions:
-            path = os.path.join(self.rosetta_folder, self.src_folder, *parts, mover_name + extension)
+        unextended_path = os.path.join(self.rosetta_folder, self.src_folder, *parts, mover_name)
+        paths: List[str] = [unextended_path + extension for extension in extensions]
+        for path in paths:
             if os.path.exists(path):
                 return path
         else:
-            raise FileNotFoundError(f'{path} does not exist')
+            raise FileNotFoundError(f'None of {paths} exist')

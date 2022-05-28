@@ -3,6 +3,8 @@ from collections import defaultdict
 from typing import List, Optional, Union
 from warnings import warn
 from bs4 import BeautifulSoup  # beautifulsoup4 lxml
+import json
+import pkg_resources
 
 from .base import BaseDocumentarian
 
@@ -11,7 +13,7 @@ class XMLDocumentarian(BaseDocumentarian):
     # cached properties:
     _xmlfilenames = [] #: all the xml files in the test folder
     _xmlprotocols = {} #: all the protocols of the the filesnames (fails!)
-    _mover_directory = defaultdict(list) #: all the filenmaes that have a given mover.
+    _mover_directory = defaultdict(list)  #: all the filenmaes that have a given mover.
 
     def get_relevant_scripts(self) -> List[str]:
         """
@@ -137,4 +139,14 @@ class XMLDocumentarian(BaseDocumentarian):
             if hasattr(mover, 'mover'):
                 movers.append(mover.mover())
         return mover
+
+    @classmethod
+    def fill(cls):
+        """
+        Fill the class attribute ``_mover_directory`` with the json info.
+        This may not be up to date. For an up to date version, see ``.get_relevant_scripts() ``
+        """
+        raw_data = json.load(pkg_resources.resource_stream(__name__, 'mover2files.json'))
+        fix_path = lambda path: path.replace('${ROSETTA_PATH}', f'{cls.rosetta_folder}/main')
+        cls._mover_directory = {k: [fix_path(vv) for vv in set(v)] for k, v in raw_data.items()}
 
